@@ -136,7 +136,7 @@ var Suite = function ( Validator, expect ) {
       } )
 
       it( 'NotNull', function () {
-        assert = new Assert().NotNull();
+        assert = new Assert().NotNull('Not Null');
 
         expect( validate( null, assert ) ).not.to.be( true );
         expect( validate( '', assert ) ).to.be( true );
@@ -145,16 +145,17 @@ var Suite = function ( Validator, expect ) {
       } )
 
       it( 'Null', function () {
-        assert = new Assert().Null();
+        assert = new Assert().Null('Null');
 
         expect( validate( null, assert ) ).to.be( true );
+        expect( validate( 5, assert ).customErrorMsg ).to.eql( 'Null' );
         expect( validate( '', assert ) ).not.to.be( true );
         expect( validate( false, assert ) ).not.to.be( true );
         expect( validate( 'foo', assert ) ).not.to.be( true );
       } )
 
       it( 'NotBlank', function () {
-        assert = new Assert().NotBlank();
+        assert = new Assert().NotBlank('Not Blank');
 
         expect( validate( null, assert ) ).not.to.be( true );
         expect( validate( '', assert ) ).not.to.be( true );
@@ -163,7 +164,7 @@ var Suite = function ( Validator, expect ) {
       } )
 
       it( 'Blank', function () {
-        assert = new Assert().Blank();
+        assert = new Assert().Blank('Blank');
 
         expect( validate( null, assert ) ).not.to.be( true );
         expect( validate( '', assert ) ).to.be( true );
@@ -180,46 +181,46 @@ var Suite = function ( Validator, expect ) {
       } )
 
       it( 'Length', function () {
-        assert = new Assert().Length( { min: 3 } );
+        assert = new Assert().Length( { min: 3 } , 'Invalid Length' );
 
         expect( validate( null, assert ) ).not.to.be( true );
         expect( validate( '', assert ) ).not.to.be( true );
         expect( validate( false, assert ) ).not.to.be( true );
-        expect( validate( false, assert ).show() ).to.eql( { assert: 'Length', value: false, violation: { value: 'must_be_a_string' } } );
+        expect( validate( false, assert ).show() ).to.eql( { assert: 'Length', value: false, violation: { value: 'must_be_a_string'  } } );
         expect( validate( 'foo', assert ) ).to.be( true );
-        expect( validate( 'f', assert ).show() ).to.eql( { assert: 'Length', value: 'f', violation: { min: 3 } } );
+        expect( validate( 'f', assert ).show() ).to.eql( { assert: 'Length', value: 'f', violation: { min: 3 , customErrorMsg :'Invalid Length'} } );
         expect( validate( 'f', assert ) ).not.to.be( true );
 
         assert = new Assert().Length( { max: 10 } );
         expect( validate( 'foo bar baz', assert ) ).not.to.be( true );
-        expect( validate( 'foo bar baz', assert ).show() ).to.eql( { assert: 'Length', value: 'foo bar baz', violation: { max: 10 } } );
+        expect( validate( 'foo bar baz', assert ).show() ).to.eql( { assert: 'Length', value: 'foo bar baz', violation: { max: 10 , customErrorMsg:undefined} } );
       } )
 
       it( 'Email', function () {
-        assert = new Assert().Email();
+        assert = new Assert().Email('Invalid email');
 
         expect( validate( 'foo', assert ) ).not.to.be( true );
         expect( validate( 'foo@bar', assert ) ).not.to.be( true );
-        expect( validate( 'foo@bar', assert ).show() ).to.eql( { assert: 'Email', value: 'foo@bar' } );
+        expect( validate( 'foo@bar', assert ).show() ).to.eql( { assert: 'Email', value: 'foo@bar' , violation: { customErrorMsg : 'Invalid email'} } );
 
         expect( validate( 'foo@bar.baz', assert ) ).to.be( true );
       } )
 
       it( 'InstanceOf', function () {
-        assert = new Assert().InstanceOf( Date );
+        assert = new Assert().InstanceOf( Date, 'Invalid date' );
 
         expect( validate( 'foo', assert ) ).not.to.be( true );
-        expect( validate( 'foo', assert ).show() ).to.eql( { assert: 'InstanceOf', value: 'foo', violation: { classRef: Date } } );
+        expect( validate( 'foo', assert ).show() ).to.eql( { assert: 'InstanceOf', value: 'foo', violation: { classRef: Date , customErrorMsg :'Invalid date'} } );
         expect( validate( 4, assert ) ).not.to.be( true );
         expect( validate( new Date(), assert ) ).to.be( true );
       } )
 
       it( 'IPv4', function () {
-        assert = new Assert().IPv4();
+        assert = new Assert().IPv4('Invalid IP Address');
 
         expect( validate( 'foo.bar', assert ) ).not.to.be( true );
         expect( validate( '192.168.1', assert ) ).not.to.be( true );
-        expect( validate( '292.168.1.201', assert ).show() ).to.eql( { assert: 'IPv4', value: '292.168.1.201' } );
+        expect( validate( '292.168.1.201', assert ).show() ).to.eql( { assert: 'IPv4', value: '292.168.1.201', violation: {customErrorMsg :'Invalid IP Address' } });
 
         expect( validate( '192.168.1.201', assert ) ).to.be( true );
       } )
@@ -229,16 +230,16 @@ var Suite = function ( Validator, expect ) {
 
         expect( validate( '0G:42:AT:F5:OP:Z2', assert ) ).not.to.be( true );
         expect( validate( 'AD:32:11:F7:3B', assert ) ).not.to.be( true );
-        expect( validate( 'AD:32:11:F7:3B:ZX', assert ).show() ).to.eql( { assert: 'Mac', value: 'AD:32:11:F7:3B:ZX' } );
+        expect( validate( 'AD:32:11:F7:3B:ZX', assert ).show() ).to.eql( { assert: 'Mac', value: 'AD:32:11:F7:3B:ZX' ,  violation: { customErrorMsg: undefined  }} );
 
         expect( validate( 'AD:32:11:F7:3B:C9', assert ) ).to.be( true );
       } )
 
       it( 'EqualTo', function () {
-        assert = new Assert().EqualTo( 42 );
+        assert = new Assert().EqualTo( 42 , 'Invalid Value');
 
         expect( validate( 'foo', assert ) ).not.to.be( true );
-        expect( validate( 'foo', assert ).show() ).to.eql( { assert: 'EqualTo', value: 'foo', violation: { value: 42 } } );
+        expect( validate( 'foo', assert ).show() ).to.eql( { assert: 'EqualTo', value: 'foo', violation: { value: 42 , customErrorMsg :'Invalid Value'} } );
         expect( validate( 4, assert ) ).not.to.be( true );
         expect( validate( 42, assert ) ).to.be( true );
       } )
@@ -246,10 +247,10 @@ var Suite = function ( Validator, expect ) {
       it( 'EqualTo w/ function', function () {
         assert = new Assert().EqualTo( function ( value ) {
           return 42;
-        } );
+        }  , 'Invalid Value');
 
         expect( validate( 'foo', assert ) ).not.to.be( true );
-        expect( validate( 'foo', assert ).show() ).to.eql( { assert: 'EqualTo', value: 'foo', violation: { value: 42 } } );
+        expect( validate( 'foo', assert ).show() ).to.eql( { assert: 'EqualTo', value: 'foo', violation: { value: 42 , customErrorMsg :'Invalid Value'} } );
         expect( validate( 4, assert ) ).not.to.be( true );
         expect( validate( 42, assert ) ).to.be( true );
       } )
@@ -259,18 +260,19 @@ var Suite = function ( Validator, expect ) {
           var calc = ( 42 / value ) % 2;
 
           return calc ? true : calc;
-        } );
+        } , "Custom Error");
 
         expect( validate( 3, assert ) ).not.to.be( true );
-        expect( validate( 3, assert ).show() ).to.eql( { assert: 'Callback', value: 3, violation: { result: 0 } } );
+        expect( validate( 3, assert ).customErrorMsg ).to.eql('Custom Error');
+        expect( validate( 3, assert ).show() ).to.eql( { assert: 'Callback', value: 3, violation: { result: 0, customErrorMsg:'Custom Error' } } );
         expect( validate( 42, assert ) ).to.be( true );
       } )
 
       it( 'Choice', function () {
-        assert = new Assert().Choice( [ 'foo', 'bar', 'baz' ] );
+        assert = new Assert().Choice( [ 'foo', 'bar', 'baz' ] , 'Invalid choice');
 
         expect( validate( 'qux', assert ) ).not.to.be( true );
-        expect( validate( 'qux', assert ).show() ).to.eql( { assert: 'Choice', value: 'qux', violation: { choices: [ 'foo', 'bar', 'baz' ] } } );
+        expect( validate( 'qux', assert ).show() ).to.eql( { assert: 'Choice', value: 'qux', violation: { choices: [ 'foo', 'bar', 'baz' ] , customErrorMsg :'Invalid choice' } } );
         expect( validate( 'foo', assert ) ).to.be( true );
       } )
 
@@ -279,34 +281,34 @@ var Suite = function ( Validator, expect ) {
           return [ val1, val2, val3 ];
         };
 
-        assert = new Assert().Choice( fn );
+        assert = new Assert().Choice( fn , 'Invalid choice' );
         expect( validate( 'qux', assert ) ).not.to.be( true );
-        expect( validate( 'qux', assert ).show() ).to.eql( { assert: 'Choice', value: 'qux', violation: { choices: [ 'foo', 'bar', 'baz' ] } } );
+        expect( validate( 'qux', assert ).show() ).to.eql( { assert: 'Choice', value: 'qux', violation: { choices: [ 'foo', 'bar', 'baz' ], customErrorMsg :'Invalid choice' } } );
         expect( validate( 'foo', assert ) ).to.be( true );
       } )
 
       it( 'Count', function () {
-        assert = new Assert().Count( 3 );
+        assert = new Assert().Count( 3 , 'Invalid count');
 
         expect( validate( 'foo', assert ) ).not.to.be( true );
-        expect( validate( 'foo', assert ).show() ).to.eql( { assert: 'Count', value: 'foo', violation: { value: 'must_be_an_array' } } );
+        expect( validate( 'foo', assert ).show() ).to.eql( { assert: 'Count', value: 'foo', violation: { value: 'must_be_an_array' } });
         expect( validate( [ 1, 2 ], assert ) ).not.to.be( true );
-        expect( validate( [ 1, 2 ], assert ).show() ).to.eql( { assert: 'Count', value: [ 1, 2 ], violation: { count: 3 } } );
+        expect( validate( [ 1, 2 ], assert ).show() ).to.eql( { assert: 'Count', value: [ 1, 2 ], violation: { count: 3 ,customErrorMsg :'Invalid count'} } );
         expect( validate( [ 1, 2, 3 ], assert ) ).to.be( true );
       } )
 
       it( 'Count w/ function', function () {
-        assert = new Assert().Count( function () { return 3; } );
+        assert = new Assert().Count( function () { return 3; } , 'Invalid Count');
 
         expect( validate( 'foo', assert ) ).not.to.be( true );
         expect( validate( 'foo', assert ).show() ).to.eql( { assert: 'Count', value: 'foo', violation: { value: 'must_be_an_array' } } );
         expect( validate( [ 1, 2 ], assert ) ).not.to.be( true );
-        expect( validate( [ 1, 2 ], assert ).show() ).to.eql( { assert: 'Count', value: [ 1, 2 ], violation: { count: 3 } } );
+        expect( validate( [ 1, 2 ], assert ).show() ).to.eql( { assert: 'Count', value: [ 1, 2 ], violation: { count: 3 , customErrorMsg :'Invalid Count' } } );
         expect( validate( [ 1, 2, 3 ], assert ) ).to.be( true );
       } )
 
       it( 'Required', function () {
-        assert = new Assert().Required();
+        assert = new Assert().Required('Must provide value');
 
         var result = validate( '', assert );
         expect( result ).not.to.be( true );
@@ -315,7 +317,7 @@ var Suite = function ( Validator, expect ) {
       } )
 
       it( 'Collection', function () {
-        var itemConstraint = new Constraint( { foobar: new Assert().NotNull(), foobaz: new Assert().NotNull() } ),
+        var itemConstraint = new Constraint( { foobar: new Assert().NotNull('Required'), foobaz: new Assert().NotNull() } ),
           object = {
             foo: null,
             items: [
@@ -343,7 +345,7 @@ var Suite = function ( Validator, expect ) {
       } )
 
       it( 'Collection with binded objects', function () {
-        var itemConstraint = { foobar: new Assert().NotNull(), foobaz: new Assert().NotNull() },
+        var itemConstraint = { foobar: new Assert().NotNull('Required'), foobaz: new Assert().NotNull('Required') },
           object = {
             foo: null,
             items: [
@@ -354,7 +356,7 @@ var Suite = function ( Validator, expect ) {
           },
           constraint = {
             foo: new Assert().NotNull(),
-            items: [ new Assert().Collection(), new Assert().Count( 2 ) ]
+            items: [ new Assert().Collection(), new Assert().Count( 2 , 'Invalid Count' ) ]
           };
 
           for ( var i = 0; i < object.items.length; i++ )
@@ -377,7 +379,7 @@ var Suite = function ( Validator, expect ) {
         assert = new Assert().Unique();
 
         expect( validate( [ 'foo', 'bar', 'baz', 'foo' ], assert ) ).not.to.be( true );
-        expect( validate( [ 'foo', 'bar', 'baz', 'foo' ], assert ).show() ).to.eql( { assert: 'Unique', value: [ 'foo', 'bar', 'baz', 'foo' ], violation: { value: 'foo' } } );
+        expect( validate( [ 'foo', 'bar', 'baz', 'foo' ], assert ).show() ).to.eql( { assert: 'Unique', value: [ 'foo', 'bar', 'baz', 'foo' ], violation: { value: 'foo' }} );
         expect( validate( [ 'foo', 'bar', 'baz' ], assert ) ).to.be( true );
       } )
 
@@ -393,67 +395,67 @@ var Suite = function ( Validator, expect ) {
       } )
 
       it( 'Eql', function () {
-        assert = new Assert().Eql( { foo: 'foo', bar: 'bar' } );
+        assert = new Assert().Eql( { foo: 'foo', bar: 'bar' } , 'Must be a equal');
 
         expect( validate( 'foo', assert) ).not.to.be( true );
-        expect( validate( 'foo', assert ).show() ).to.eql( { assert: 'Eql', value: 'foo', violation: { eql: { foo: 'foo', bar: 'bar' } } } );
+        expect( validate( 'foo', assert ).show() ).to.eql( { assert: 'Eql', value: 'foo', violation: { eql: { foo: 'foo', bar: 'bar' } , customErrorMsg: 'Must be a equal' } } );
         expect( validate( { foo: 'foo' }, assert ) ).not.to.be( true );
         expect( validate( { foo: null, bar: null }, assert ) ).not.to.be( true );
         expect( validate( { foo: 'foo', bar: 'bar' }, assert ) ).to.be( true );
       } )
 
       it( 'Eql w/ function', function () {
-        assert = new Assert().Eql( function ( value ) { return { foo: 'foo', bar: 'bar' } } );
+        assert = new Assert().Eql( function ( value ) { return { foo: 'foo', bar: 'bar' } }, 'Must be a equal' );
 
         expect( validate( { foo: null, bar: null }, assert ) ).not.to.be( true );
         expect( validate( { foo: 'foo', bar: 'bar' }, assert ) ).to.be( true );
       } )
 
       it( 'Regexp', function () {
-        assert = new Assert().Regexp( '^[A-Z]' );
+        assert = new Assert().Regexp( '^[A-Z]' , '','Invalid Value');
 
         expect( validate( 'foo', assert ) ).not.to.be( true );
-        expect( validate( 'foo', assert ).show() ).to.eql( { assert: 'Regexp', value: 'foo', violation: { regexp: '^[A-Z]', flag: '' } } );
+        expect( validate( 'foo', assert ).show() ).to.eql( { assert: 'Regexp', value: 'foo', violation: { regexp: '^[A-Z]', flag: '' , customErrorMsg :'Invalid Value'} } );
         expect( validate( 'FOO', assert ) ).to.be( true );
       } )
 
       it( 'Range', function () {
-        assert = new Assert().Range( 5, 10 );
+        assert = new Assert().Range( 5, 10 , 'Invalid Range');
         expect( validate( 'foo', assert ) ).not.to.be( true );
-        expect( validate( 'foo', assert ).show() ).to.eql( { assert: 'Range', value: 'foo', violation: { min: 5 } } );
+        expect( validate( 'foo', assert ).show() ).to.eql( { assert: 'Range', value: 'foo', violation: { min: 5 , customErrorMsg :'Invalid Range'} } );
         expect( validate( 'foo bar', assert ) ).to.be( true );
         expect( validate( 'foo bar baz', assert ) ).not.to.be( true );
-        expect( validate( 'foo bar baz', assert ).show() ).to.eql( { assert: 'Range', value: 'foo bar baz', violation: { max: 10 } } );
+        expect( validate( 'foo bar baz', assert ).show() ).to.eql( { assert: 'Range', value: 'foo bar baz', violation: { max: 10, customErrorMsg :'Invalid Range'} } );
       } )
 
       it( 'GreaterThan', function () {
-        assert = new Assert().GreaterThan( 5 );
+        assert = new Assert().GreaterThan( 5 , 'Invalid Value');
         expect( validate( 3, assert ) ).not.to.be( true );
-        expect( validate( 5, assert ).show() ).to.eql( { assert: 'GreaterThan', value: 5, violation: { threshold: 5 } } );
+        expect( validate( 5, assert ).show() ).to.eql( { assert: 'GreaterThan', value: 5, violation: { threshold: 5 , customErrorMsg :'Invalid Value'} } );
         expect( validate( 7, assert ) ).to.be( true );
       } )
 
       it( 'GreaterThanOrEqual', function () {
-        assert = new Assert().GreaterThanOrEqual( 5 );
+        assert = new Assert().GreaterThanOrEqual( 5 ,'Invalid Value');
         expect( validate( 3, assert ) ).not.to.be( true );
-        expect( validate( 3, assert ).show() ).to.eql( { assert: 'GreaterThanOrEqual', value: 3, violation: { threshold: 5 } } );
+        expect( validate( 3, assert ).show() ).to.eql( { assert: 'GreaterThanOrEqual', value: 3, violation: { threshold: 5 , customErrorMsg :'Invalid Value'} } );
         expect( validate( 5, assert ) ).to.be( true );
         expect( validate( 7, assert ) ).to.be( true );
       } )
 
       it( 'LessThan', function () {
-        assert = new Assert().LessThan( 5 );
+        assert = new Assert().LessThan( 5 , 'Invalid Value');
         expect( validate( 3, assert ) ).to.be( true );
-        expect( validate( 5, assert ).show() ).to.eql( { assert: 'LessThan', value: 5, violation: { threshold: 5 } } );
+        expect( validate( 5, assert ).show() ).to.eql( { assert: 'LessThan', value: 5, violation: { threshold: 5 , customErrorMsg :'Invalid Value'} } );
         expect( validate( 7, assert ) ).not.to.be( true );
       } )
 
       it( 'LessThanOrEqual', function () {
-        assert = new Assert().LessThanOrEqual( 5 );
+        assert = new Assert().LessThanOrEqual( 5 , 'Invalid Value');
         expect( validate( 3, assert ) ).to.be( true );
         expect( validate( 5, assert ) ).to.be( true );
         expect( validate( 7, assert ) ).not.to.be( true );
-        expect( validate( 7, assert ).show() ).to.eql( { assert: 'LessThanOrEqual', value: 7, violation: { threshold: 5 } } );
+        expect( validate( 7, assert ).show() ).to.eql( { assert: 'LessThanOrEqual', value: 7, violation: { threshold: 5 , customErrorMsg :'Invalid Value'} } );
       } )
     } )
 
@@ -475,7 +477,7 @@ var Suite = function ( Validator, expect ) {
 
       it( 'should throw an error if not instanciated with an object', function () {
         try {
-          new Constraint( new Assert().Length( { min: 10 } ) );
+          new Constraint( new Assert().Length( { min: 10 } ),'Invalid value' );
           expect().fails();
         } catch ( err ) {
           expect( err.message ).to.be( 'Should give a valid mapping object to Constraint' );

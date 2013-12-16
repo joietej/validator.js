@@ -260,9 +260,16 @@
 
     this.assert = assert.__class__;
     this.value = value;
+    this.customErrorMsg = '';
 
-    if ( 'undefined' !== typeof violation)
+    if ( 'undefined' !== typeof violation){
+      
       this.violation = violation;
+
+      if ( 'undefined' !== typeof violation.customErrorMsg){
+         this.customErrorMsg = violation.customErrorMsg ;
+      }
+    }
   };
 
   Violation.prototype = {
@@ -398,7 +405,7 @@
       return this;
     },
 
-    Blank: function () {
+    Blank: function ( customErrorMsg ) {
       this.__class__ = 'Blank';
 
       this.validate = function ( value ) {
@@ -406,7 +413,7 @@
           throw new Violation( this, value, { value: Validator.const.must_be_a_string } );
 
         if ( '' !== value.replace( /^\s+/g, '' ).replace( /\s+$/g, '' ) )
-          throw new Violation( this, value );
+          throw new Violation( this, value , {customErrorMsg : customErrorMsg} );
 
         return true;
       };
@@ -414,7 +421,7 @@
       return this;
     },
 
-    Callback: function ( fn ) {
+    Callback: function ( fn , customErrorMsg ) {
       this.__class__ = 'Callback';
 
       if ( 'function' !== typeof fn )
@@ -426,7 +433,7 @@
         var result = fn( value, this );
 
         if ( true !== result )
-          throw new Violation( this, value, { result: result } );
+          throw new Violation( this, value, { result: result,customErrorMsg :customErrorMsg } );
 
         return true;
       };
@@ -434,7 +441,7 @@
       return this;
     },
 
-    Choice: function ( list ) {
+    Choice: function ( list , customErrorMsg ) {
       this.__class__ = 'Choice';
 
       if ( !_isArray( list ) && 'function' !== typeof list )
@@ -449,7 +456,7 @@
           if ( value === list[ i ] )
             return true;
 
-        throw new Violation( this, value, { choices: list } );
+        throw new Violation( this, value, { choices: list, customErrorMsg:customErrorMsg } );
       };
 
       return this;
@@ -482,7 +489,7 @@
       return this;
     },
 
-    Count: function ( count ) {
+    Count: function ( count , customErrorMsg ) {
       this.__class__ = 'Count';
       this.count = count;
 
@@ -496,7 +503,7 @@
           throw new Error( 'Count must be a valid interger', count );
 
         if ( count !== array.length )
-          throw new Violation( this, array, { count: count } );
+          throw new Violation( this, array, { count: count , customErrorMsg:customErrorMsg } );
 
         return true;
       };
@@ -504,7 +511,7 @@
       return this;
     },
 
-    Email: function () {
+    Email: function ( customErrorMsg ) {
       this.__class__ = 'Email';
 
       this.validate = function ( value ) {
@@ -514,7 +521,7 @@
           throw new Violation( this, value, { value: Validator.const.must_be_a_string } );
 
         if ( !regExp.test( value ) )
-          throw new Violation( this, value );
+          throw new Violation( this, value, {customErrorMsg:customErrorMsg} );
 
         return true;
       };
@@ -522,7 +529,7 @@
       return this;
     },
 
-    Eql: function ( eql ) {
+    Eql: function ( eql , customErrorMsg ) {
       this.__class__ = 'Eql';
 
       if ( 'undefined' === typeof eql )
@@ -534,7 +541,7 @@
         var eql = 'function' === typeof this.eql ? this.eql( value ) : this.eql;
 
         if ( !expect.eql( eql, value ) )
-          throw new Violation( this, value, { eql: eql } );
+          throw new Violation( this, value, { eql: eql,customErrorMsg:customErrorMsg } );
 
         return true;
       };
@@ -542,7 +549,7 @@
       return this;
     },
 
-    EqualTo: function ( reference ) {
+    EqualTo: function ( reference, customErrorMsg ) {
       this.__class__ = 'EqualTo';
 
       if ( 'undefined' === typeof reference )
@@ -554,7 +561,7 @@
         var reference = 'function' === typeof this.reference ? this.reference( value ) : this.reference;
 
         if ( reference !== value )
-          throw new Violation( this, value, { value: reference } );
+          throw new Violation( this, value, { value: reference,customErrorMsg:customErrorMsg } );
 
         return true;
       };
@@ -562,7 +569,7 @@
       return this;
     },
 
-    GreaterThan: function ( threshold ) {
+    GreaterThan: function ( threshold,customErrorMsg ) {
       this.__class__ = 'GreaterThan';
 
       if ( 'undefined' === typeof threshold )
@@ -575,7 +582,7 @@
           throw new Violation( this, value, { value: Validator.const.must_be_a_number } );
 
         if ( this.threshold >= value )
-          throw new Violation( this, value, { threshold: this.threshold } );
+          throw new Violation( this, value, { threshold: this.threshold,customErrorMsg:customErrorMsg } );
 
         return true;
       };
@@ -583,7 +590,7 @@
       return this;
     },
 
-    GreaterThanOrEqual: function ( threshold ) {
+    GreaterThanOrEqual: function ( threshold,customErrorMsg) {
       this.__class__ = 'GreaterThanOrEqual';
 
       if ( 'undefined' === typeof threshold )
@@ -593,7 +600,7 @@
 
       this.validate = function ( value ) {
         if ( this.threshold > value )
-          throw new Violation( this, value, { threshold: this.threshold } );
+          throw new Violation( this, value, { threshold: this.threshold,customErrorMsg:customErrorMsg } );
 
         return true;
       };
@@ -601,7 +608,7 @@
       return this;
     },
 
-    InstanceOf: function ( classRef ) {
+    InstanceOf: function ( classRef,customErrorMsg ) {
       this.__class__ = 'InstanceOf';
 
       if ( 'undefined' === typeof classRef )
@@ -611,7 +618,7 @@
 
       this.validate = function ( value ) {
         if ( true !== (value instanceof this.classRef) )
-          throw new Violation( this, value, { classRef: this.classRef } );
+          throw new Violation( this, value, { classRef: this.classRef,customErrorMsg:customErrorMsg } );
 
         return true;
       };
@@ -619,7 +626,7 @@
       return this;
     },
 
-    IPv4: function () {
+    IPv4: function (customErrorMsg) {
       this.__class__ = 'IPv4';
 
       this.validate = function ( value ) {
@@ -629,7 +636,7 @@
           throw new Violation( this, value, { value: Validator.const.must_be_a_string } );
 
         if ( !regExp.test( value ) )
-          throw new Violation( this, value );
+          throw new Violation( this, value ,{customErrorMsg:customErrorMsg});
 
         return true;
       };
@@ -637,7 +644,7 @@
       return this;
     },
 
-    Length: function ( boundaries ) {
+    Length: function ( boundaries , customErrorMsg) {
       this.__class__ = 'Length';
 
       if ( !boundaries.min && !boundaries.max )
@@ -651,13 +658,13 @@
           throw new Violation( this, value, { value: Validator.const.must_be_a_string } );
 
         if ( 'undefined' !== typeof this.min && this.min === this.max && value.length !== this.min )
-          throw new Violation( this, value, { min: this.min, max: this.max } );
+          throw new Violation( this, value, { min: this.min, max: this.max , customErrorMsg: customErrorMsg } );
 
         if ( 'undefined' !== typeof this.max && value.length > this.max )
-          throw new Violation( this, value, { max: this.max } );
+          throw new Violation( this, value, { max: this.max , customErrorMsg: customErrorMsg } );
 
         if ( 'undefined' !== typeof this.min && value.length < this.min )
-          throw new Violation( this, value, { min: this.min } );
+          throw new Violation( this, value, { min: this.min, customErrorMsg: customErrorMsg } );
 
         return true;
       };
@@ -665,7 +672,7 @@
       return this;
     },
 
-    LessThan: function ( threshold ) {
+    LessThan: function ( threshold, customErrorMsg ) {
       this.__class__ = 'LessThan';
 
       if ( 'undefined' === typeof threshold )
@@ -678,7 +685,7 @@
           throw new Violation( this, value, { value: Validator.const.must_be_a_number } );
 
         if ( this.threshold <= value )
-          throw new Violation( this, value, { threshold: this.threshold } );
+          throw new Violation( this, value, { threshold: this.threshold , customErrorMsg: customErrorMsg} );
 
         return true;
       };
@@ -686,7 +693,7 @@
       return this;
     },
 
-    LessThanOrEqual: function ( threshold ) {
+    LessThanOrEqual: function ( threshold,customErrorMsg) {
       this.__class__ = 'LessThanOrEqual';
 
       if ( 'undefined' === typeof threshold )
@@ -696,7 +703,7 @@
 
       this.validate = function ( value ) {
         if ( this.threshold < value )
-          throw new Violation( this, value, { threshold: this.threshold } );
+          throw new Violation( this, value, { threshold: this.threshold , customErrorMsg: customErrorMsg } );
 
         return true;
       };
@@ -704,7 +711,7 @@
       return this;
     },
 
-    Mac: function () {
+    Mac: function ( customErrorMsg ) {
       this.__class__ = 'Mac';
 
       this.validate = function ( value ) {
@@ -714,7 +721,7 @@
           throw new Violation( this, value, { value: Validator.const.must_be_a_string } );
 
         if ( !regExp.test( value ) )
-          throw new Violation( this, value );
+          throw new Violation( this, value, { customErrorMsg: customErrorMsg} );
 
         return true;
       };
@@ -722,12 +729,12 @@
       return this;
     },
 
-    NotNull: function () {
+    NotNull: function ( customErrorMsg ) {
       this.__class__ = 'NotNull';
 
       this.validate = function ( value ) {
         if ( null === value || 'undefined' === typeof value )
-          throw new Violation( this, value );
+          throw new Violation( this, value , { customErrorMsg: customErrorMsg} );
 
         return true;
       };
@@ -735,7 +742,7 @@
       return this;
     },
 
-    NotBlank: function () {
+    NotBlank: function ( customErrorMsg) {
       this.__class__ = 'NotBlank';
 
       this.validate = function ( value ) {
@@ -751,12 +758,12 @@
       return this;
     },
 
-    Null: function () {
+    Null: function ( customErrorMsg ) {
       this.__class__ = 'Null';
 
       this.validate = function ( value ) {
         if ( null !== value )
-          throw new Violation( this, value );
+          throw new Violation( this, value , { customErrorMsg: customErrorMsg} );
 
         return true;
       };
@@ -764,11 +771,11 @@
       return this;
     },
 
-    Range: function ( min, max ) {
+    Range: function ( min, max, customErrorMsg ) {
       if ( !min || !max )
         throw new Error( 'Range assert expects min and max values' );
 
-      this.LengthValidator = new Assert().Length( { min: min, max: max } );
+      this.LengthValidator = new Assert().Length( { min: min, max: max } , customErrorMsg );
       this.__class__ = 'Range';
 
       this.validate = function ( value ) {
@@ -784,7 +791,7 @@
       return this;
     },
 
-    Regexp: function ( regexp, flag ) {
+    Regexp: function ( regexp, flag , customErrorMsg) {
       this.__class__ = 'Regexp';
 
       if ( 'undefined' === typeof regexp )
@@ -798,7 +805,7 @@
           throw new Violation( this, value, { value: Validator.const.must_be_a_string } );
 
         if ( !new RegExp( this.regexp ).test( value, this.flag ) )
-          throw new Violation( this, value, { regexp: this.regexp, flag: this.flag } );
+          throw new Violation( this, value, { regexp: this.regexp, flag: this.flag , customErrorMsg: customErrorMsg} );
 
         return true;
       };
@@ -806,7 +813,7 @@
       return this;
     },
 
-    Required: function () {
+    Required: function (customErrorMsg) {
       this.__class__ = 'Required';
 
       this.validate = function ( value ) {
@@ -817,7 +824,7 @@
           try {
             new Assert().NotNull().validate( value ) && new Assert().NotBlank().validate( value );
           } catch ( violation ) {
-            throw new Violation( this, value );
+            throw new Violation( this, value , { customErrorMsg: customErrorMsg});
           }
 
         return true;
