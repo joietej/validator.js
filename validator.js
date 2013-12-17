@@ -813,16 +813,17 @@
       return this;
     },
 
-    Required: function (customErrorMsg) {
+    Required: function ( customErrorMsg ) {
       this.__class__ = 'Required';
 
       this.validate = function ( value ) {
         if ( 'undefined' === typeof value )
-          throw new Violation( this, value );
+          throw new Violation( this, value , { customErrorMsg: customErrorMsg});
 
-        if ( 'string' === typeof value )
           try {
-            new Assert().NotNull().validate( value ) && new Assert().NotBlank().validate( value );
+            new Assert().NotNull().validate( value ) ;
+             if ( 'string' === typeof value )
+                new Assert().NotBlank().validate( value );
           } catch ( violation ) {
             throw new Violation( this, value , { customErrorMsg: customErrorMsg});
           }
