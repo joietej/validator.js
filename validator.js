@@ -742,7 +742,7 @@
       return this;
     },
 
-    NotBlank: function ( customErrorMsg) {
+    NotBlank: function ( customErrorMsg ) {
       this.__class__ = 'NotBlank';
 
       this.validate = function ( value ) {
@@ -750,7 +750,7 @@
           throw new Violation( this, value, { value: Validator.const.must_be_a_string } );
 
         if ( '' === value.replace( /^\s+/g, '' ).replace( /\s+$/g, '' ) )
-          throw new Violation( this, value );
+          throw new Violation( this, value , { customErrorMsg: customErrorMsg});
 
         return true;
       };
